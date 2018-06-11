@@ -1,6 +1,9 @@
 package mrsssswan.mall.service;
 
+import mrsssswan.mall.commons.ServerResponse;
+import mrsssswan.mall.pojo.User;
+
 public interface IUserService {
 
-     Object login(String username,String password);
+    ServerResponse<User> login(String username, String password);
 }
