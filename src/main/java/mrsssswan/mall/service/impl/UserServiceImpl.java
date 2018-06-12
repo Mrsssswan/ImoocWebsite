@@ -1,9 +1,11 @@
 package mrsssswan.mall.service.impl;
 
+import mrsssswan.mall.commons.Const;
 import mrsssswan.mall.commons.ServerResponse;
 import mrsssswan.mall.dao.UserMapper;
 import mrsssswan.mall.pojo.User;
 import mrsssswan.mall.service.IUserService;
+import mrsssswan.mall.util.MD5Util;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,12 +24,52 @@ public class UserServiceImpl implements IUserService {
         }
 
         //todo md5密码加密
-        User user = userMapper.login(username,password);
+        String md5Pass = MD5Util.MD5EncodeUtf8(password);
+        User user = userMapper.login(username,md5Pass);
         if(user == null){
             return ServerResponse.createByErrorMessage("密码不正确");
         }
         //将密码设置为null
         user.setPassword(StringUtils.EMPTY);
         return ServerResponse.createBySuccess("登录成功",user);
+    }
+
+    @Override
+    public ServerResponse<String> register(User user) {
+       ServerResponse<String> validResponse = this.checkValid(user.getUsername(),Const.USERNAME);
+       if(!validResponse.isSuccess())
+           return validResponse;
+        validResponse = this.checkValid(user.getEmail(),Const.EMAIL);
+        if(!validResponse.isSuccess())
+            return validResponse;
+        user.setRole(Const.Role.ROLE_CUSTOMER);//设置类型
+        user.setPassword(MD5Util.MD5EncodeUtf8(user.getPassword()));
+        int resultCount = userMapper.insert(user);
+        if(resultCount == 0){
+            return ServerResponse.createByErrorMessage("注册失败");
+        }
+        return ServerResponse.createBySuccess("注册成功");
+    }
+
+    @Override
+    public ServerResponse<String> checkValid(String str, String type) { //根据type判断str
+        if(StringUtils.isNotBlank(type)){
+            //校验用户名
+            if(Const.USERNAME.equals(type)){
+                int resultCount =   userMapper.checkUsername(str);
+                if(resultCount > 0){
+                    return ServerResponse.createByErrorMessage("用户名已注册");
+                }
+            }
+            //校验密码
+            if(Const.EMAIL.equals(str)){
+                int resultCount =   userMapper.checkEmail(type);
+                if(resultCount > 0){
+                    return ServerResponse.createByErrorMessage("邮箱已注册");
+                }
+            }
+        }else
+            return ServerResponse.createByErrorMessage("参数错误");
+        return ServerResponse.createBySuccessMessage("校验成功");
     }
 }
