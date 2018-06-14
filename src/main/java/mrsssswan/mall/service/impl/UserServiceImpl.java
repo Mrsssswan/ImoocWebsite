@@ -60,26 +60,25 @@ public class UserServiceImpl implements IUserService {
         if(StringUtils.isNotBlank(type)){
             //校验用户名
             if(Const.USERNAME.equals(type)){
-                int resultCount =   userMapper.checkUsername(str);
-                if(resultCount > 0){
+                int resultCount = userMapper.checkUsername(str);
+                if(resultCount > 0 ){
                     return ServerResponse.createByErrorMessage("用户名已注册");
                 }
             }
-            //校验密码
-            if(Const.EMAIL.equals(str)){
-                int resultCount =   userMapper.checkEmail(type);
+            if(Const.EMAIL.equals(type)){
+                int resultCount =   userMapper.checkEmail(str);
                 if(resultCount > 0){
                     return ServerResponse.createByErrorMessage("邮箱已注册");
                 }
             }
-        }else
+        }else{
             return ServerResponse.createByErrorMessage("参数错误");
+        }
         return ServerResponse.createBySuccessMessage("校验成功");
     }
-
     @Override
-    public ServerResponse<String> selectQuestion(String username) {
-        ServerResponse<String> validResponse = this.checkValid(username,Const.USERNAME);
+    public ServerResponse selectQuestion(String username) {
+        ServerResponse validResponse = this.checkValid(username,Const.USERNAME);
         if(validResponse.isSuccess())
             return ServerResponse.createByErrorMessage("用户不存在");
         String question =  userMapper.selectQuestion(username);
@@ -113,12 +112,58 @@ public class UserServiceImpl implements IUserService {
             return ServerResponse.createByErrorMessage("token无效或过期");
         if(StringUtils.equals(token,forgetToken)){
             String md5Password = MD5Util.MD5EncodeUtf8(passwordNew);
-            int reslutCount = userMapper.updatePasswordByUsername(username,passwordNew);
+            int reslutCount = userMapper.updatePasswordByUsername(username,md5Password);
             if(reslutCount > 0)
                 return ServerResponse.createBySuccessMessage("修改密码成功");
             else
                 return ServerResponse.createByErrorMessage("token错误，请重新获取充值密码的token");
         }
         return ServerResponse.createByErrorMessage("修改密码失败");
+    }
+
+    @Override
+    public ServerResponse<String> resetpassword(String passwordOld, String passwordNew, User user) {
+        //防止横向越权，旧密码一定要指定用户
+        int resultCount = userMapper.checkPassword(MD5Util.MD5EncodeUtf8(passwordOld),user.getId());
+        if(resultCount==0){
+            return ServerResponse.createByErrorMessage("旧密码错误");
+        }
+            user.setPassword(MD5Util.MD5EncodeUtf8(passwordOld));
+            resultCount =  userMapper.updateByPrimaryKeySelective(user);
+            if(resultCount > 0){
+                return ServerResponse.createBySuccess("修改密码成功");
+            }
+           return ServerResponse.createByErrorMessage("修改密码失败");
+    }
+
+    @Override
+    public ServerResponse<User> updateImformation(User user) {
+        //需要校验email
+        int resultCount = userMapper.checkEmailByUserId(user.getEmail(),user.getId());
+        if(resultCount>0){
+            return ServerResponse.createByErrorMessage("邮箱已被占用");
+        }
+        User updateUser = new User();
+        updateUser.setId(user.getId());
+        updateUser.setUsername(user.getUsername());
+        updateUser.setEmail(user.getEmail());
+        updateUser.setPhone(user.getPhone());
+        updateUser.setQuestion(user.getQuestion());
+        updateUser.setAnswer(user.getAnswer());
+        resultCount = userMapper.updateByPrimaryKeySelective(updateUser);
+        if(resultCount==0){
+            return ServerResponse.createByErrorMessage("用户个人信息更新失败");
+        }
+        return ServerResponse.createBySuccess("更新成功",updateUser);
+    }
+
+    @Override
+    public ServerResponse<User> getImformation(Integer id) {
+        User user = userMapper.selectByPrimaryKey(id);
+        if(user==null){
+            return ServerResponse.createByErrorMessage("用户不存在");
+        }
+        user.setPassword(StringUtils.EMPTY);
+        return ServerResponse.createBySuccess(user);
     }
 }

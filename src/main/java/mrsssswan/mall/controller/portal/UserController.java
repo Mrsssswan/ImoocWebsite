@@ -1,15 +1,16 @@
-package mrsssswan.mall.controller;
+package mrsssswan.mall.controller.portal;
 
 import mrsssswan.mall.commons.Const;
+import mrsssswan.mall.commons.ResponseCode;
 import mrsssswan.mall.commons.ServerResponse;
 import mrsssswan.mall.pojo.User;
 import mrsssswan.mall.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
 import javax.servlet.http.HttpSession;
 
 @Controller
@@ -21,9 +22,9 @@ public class UserController {
 
     /**
      * 用户登录
-     * @param username
-     * @param password
-     * @param session
+     * @param username 用户名
+     * @param password 密码
+     * @param session 存储的session
      * @return 返回响应结果
      */
     @ResponseBody
@@ -42,7 +43,7 @@ public class UserController {
      * @return
      */
     @ResponseBody
-    @GetMapping("logout.do")
+    @PostMapping("logout.do")
     public ServerResponse<String> logout( HttpSession session) {
 
         session.removeAttribute(Const.CURRENT_USER);
@@ -55,7 +56,7 @@ public class UserController {
      * @return
      */
     @ResponseBody
-    @GetMapping("register.do")
+    @PostMapping("register.do")
     public ServerResponse<String> register(User user){
        return iUserService.register(user);
     }
@@ -67,7 +68,7 @@ public class UserController {
      * @return
      */
     @ResponseBody
-    @GetMapping("check_Valid.do")
+    @PostMapping("check_Valid.do")
     public ServerResponse<String> checkValid(String str,String type){
         return iUserService.checkValid(str,type);
     }
@@ -78,7 +79,7 @@ public class UserController {
      * @return
      */
     @ResponseBody
-    @GetMapping("get_user_info.do")
+    @PostMapping("get_user_info.do")
     public ServerResponse<User> getUserInfo(HttpSession session){
         User user = (User)session.getAttribute(Const.CURRENT_USER);
         if(user!=null)
@@ -92,9 +93,9 @@ public class UserController {
      * @return 返回响应结果
      */
     @ResponseBody
-    @GetMapping("forget_get_question.do")
-    public ServerResponse<String> forgetPassGetQuestion(String usename){
-        return iUserService.selectQuestion(usename);
+    @PostMapping("forget_get_question.do")
+    public ServerResponse forgetPassGetQuestion(String username){
+        return iUserService.selectQuestion(username);
     }
 
     /**
@@ -105,7 +106,7 @@ public class UserController {
      * @return 返回响应结果
      */
     @ResponseBody
-    @GetMapping("forget_check_answer.do")
+    @PostMapping("forget_check_answer.do")
     public ServerResponse<String> forgetCheckAnswer(String username, String question, String answer){
         return iUserService.checkAnswer(username,question,answer);
     }
@@ -118,10 +119,43 @@ public class UserController {
      * @return 返回响应结果
      */
     @ResponseBody
-    @GetMapping("forget_reset_password.do")
+    @PostMapping("forget_reset_password.do")
     public ServerResponse<String> forgetResetpassword(String username, String passwordNew, String forgetToken){
         return iUserService.forgetResetToken(username,passwordNew,forgetToken);
     }
 
+    @ResponseBody
+    @PostMapping("reset_password.do")
+    public ServerResponse<String> resetpassword(String passwordOld, String passwordNew, HttpSession session){
+        User user = (User)session.getAttribute(Const.CURRENT_USER);
+        if(user == null){
+            return ServerResponse.createByErrorMessage("用户未登录");
+        }
+        return iUserService.resetpassword(passwordOld,passwordNew,user);
+    }
+    @ResponseBody
+    @PostMapping("update_information.do")
+    public ServerResponse<User> updateInformation(HttpSession session, User user){
+        User currentUser = (User)session.getAttribute(Const.CURRENT_USER);
+        if(currentUser == null){
+            return ServerResponse.createByErrorMessage("用户未登录");
+        }
+        user.setId(currentUser.getId());
+        user.setUsername(currentUser.getUsername());
+        ServerResponse<User> response = iUserService.updateImformation(user);
+        if(response.isSuccess()){
+            session.setAttribute(Const.CURRENT_USER,response.getData());
+        }
+        return response;
+    }
+    @ResponseBody
+    @PostMapping("get_information.do")
+    public ServerResponse<User> getInformation(HttpSession session){
+        User currentUser = (User)session.getAttribute(Const.CURRENT_USER);
+        if(currentUser == null){
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),"未登录，需要登录");
+        }
 
+        return iUserService.getImformation(currentUser.getId());
+    }
 }

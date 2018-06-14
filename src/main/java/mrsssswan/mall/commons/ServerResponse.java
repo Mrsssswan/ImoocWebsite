@@ -1,7 +1,8 @@
 package mrsssswan.mall.commons;
 
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import java.io.Serializable;
 
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
@@ -59,7 +60,7 @@ public class ServerResponse<T> implements Serializable {
         return new ServerResponse<T>(ResponseCode.SUCCESS.getCode(),msg,data);
     }
 
-    public static <T> ServerResponse<T> createByError(){
+    public static <T> ServerResponse<T> createByErrorCodeMessage(int code,String msg){
         return new ServerResponse<T>(ResponseCode.ERROR.getCode(),ResponseCode.ERROR.getMsg());
     }
     public static <T> ServerResponse<T> createByErrorMessage(String errorMessage){
