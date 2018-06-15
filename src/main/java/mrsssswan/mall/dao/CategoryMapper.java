@@ -2,7 +2,10 @@ package mrsssswan.mall.dao;
 
 import mrsssswan.mall.pojo.Category;
 
+import java.util.List;
+
 public interface CategoryMapper {
+
     int deleteByPrimaryKey(Integer id);
 
     int insert(Category record);
@@ -14,4 +17,6 @@ public interface CategoryMapper {
     int updateByPrimaryKeySelective(Category record);
 
     int updateByPrimaryKey(Category record);
+
+    List<Category> selectChildrenParallelCategory(Integer id);
 }
