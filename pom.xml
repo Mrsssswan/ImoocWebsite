@@ -180,6 +180,7 @@
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
 <<<<<<< HEAD
+<<<<<<< HEAD
 			<version>1.10</version>
 		</dependency>
 		<dependency>
@@ -192,6 +193,11 @@
 		</dependency>
 
 >>>>>>> b688ebfab920628eafa9c4ad1021c5673a1bae70
+=======
+			<version>1.11</version>
+		</dependency>
+
+>>>>>>> 319770798c7ce1d95fcbbb1b1c2c241c5f673302
 		<dependency>
 			<groupId>commons-lang</groupId>
 			<artifactId>commons-lang</artifactId>
@@ -201,10 +207,14 @@
 			<groupId>commons-logging</groupId>
 			<artifactId>commons-logging</artifactId>
 <<<<<<< HEAD
+<<<<<<< HEAD
 			<version>1.1.1</version>
 =======
 			<version>1.2</version>
 >>>>>>> b688ebfab920628eafa9c4ad1021c5673a1bae70
+=======
+			<version>1.2</version>
+>>>>>>> 319770798c7ce1d95fcbbb1b1c2c241c5f673302
 		</dependency>
 		<dependency>
 			<groupId>commons-collections</groupId>
@@ -216,20 +226,28 @@
 			<groupId>com.google.zxing</groupId>
 			<artifactId>core</artifactId>
 <<<<<<< HEAD
+<<<<<<< HEAD
 			<version>2.1</version>
 =======
 			<version>3.3.3</version>
 >>>>>>> b688ebfab920628eafa9c4ad1021c5673a1bae70
+=======
+			<version>3.3.3</version>
+>>>>>>> 319770798c7ce1d95fcbbb1b1c2c241c5f673302
 		</dependency>
 
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
 <<<<<<< HEAD
+<<<<<<< HEAD
 			<version>2.3.1</version>
 =======
 			<version>2.8.5</version>
 >>>>>>> b688ebfab920628eafa9c4ad1021c5673a1bae70
+=======
+			<version>2.8.5</version>
+>>>>>>> 319770798c7ce1d95fcbbb1b1c2c241c5f673302
 		</dependency>
 		<dependency>
 			<groupId>org.hamcrest</groupId>
@@ -254,6 +272,7 @@
 			</plugin>
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 			<plugin>
 					<groupId>org.apache.maven</groupId>
 					<artifactId>maven-plugin-api</artifactId>
@@ -268,6 +287,8 @@
 
 			</plugin>
 =======
+=======
+>>>>>>> 319770798c7ce1d95fcbbb1b1c2c241c5f673302
 			<!--<plugin>-->
 					<!--<groupId>org.apache.maven</groupId>-->
 					<!--<artifactId>maven-plugin-api</artifactId>-->
@@ -282,7 +303,10 @@
 			 		<!--</configuration>-->
 
 			<!--</plugin>-->
+<<<<<<< HEAD
 >>>>>>> b688ebfab920628eafa9c4ad1021c5673a1bae70
+=======
+>>>>>>> 319770798c7ce1d95fcbbb1b1c2c241c5f673302
 		</plugins>
 	</build>
 

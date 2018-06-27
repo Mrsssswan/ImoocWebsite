@@ -3,11 +3,17 @@ package mrsssswan.mall.dao;
 import mrsssswan.mall.pojo.Product;
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 =======
 >>>>>>> b688ebfab920628eafa9c4ad1021c5673a1bae70
+=======
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
+>>>>>>> 319770798c7ce1d95fcbbb1b1c2c241c5f673302
 =======
 import org.apache.ibatis.annotations.Param;
 
@@ -28,6 +34,9 @@ public interface ProductMapper {
     int updateByPrimaryKey(Product record);
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 319770798c7ce1d95fcbbb1b1c2c241c5f673302
 =======
 >>>>>>> 319770798c7ce1d95fcbbb1b1c2c241c5f673302
 
@@ -35,8 +44,11 @@ public interface ProductMapper {
 
     List<Product> getListByNameAndId(@Param("name") String name, @Param("id") Integer id);
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> b688ebfab920628eafa9c4ad1021c5673a1bae70
+=======
+>>>>>>> 319770798c7ce1d95fcbbb1b1c2c241c5f673302
 =======
 >>>>>>> 319770798c7ce1d95fcbbb1b1c2c241c5f673302
 }
