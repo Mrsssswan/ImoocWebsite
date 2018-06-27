@@ -1,0 +1,75 @@
+/target/
+<<<<<<< HEAD
+
+!.mvn/wrapper/maven-wrapper.jar
+
+
+
+### STS ###
+
+.apt_generated
+
+.classpath
+
+.factorypath
+
+.project
+
+.settings
+
+.springBeans
+
+.sts4-cache
+
+
+
+### IntelliJ IDEA ###
+
+.idea
+
+*.iws
+
+*.iml
+
+*.ipr
+
+
+
+### NetBeans ###
+
+/nbproject/private/
+
+/build/
+
+/nbbuild/
+
+/dist/
+
+/nbdist/
+
+=======
+!.mvn/wrapper/maven-wrapper.jar
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/build/
+/nbbuild/
+/dist/
+/nbdist/
+>>>>>>> b688ebfab920628eafa9c4ad1021c5673a1bae70
+/.nb-gradle/
