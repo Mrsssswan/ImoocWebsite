@@ -6,7 +6,7 @@
 <generatorConfiguration>
     <properties resource="classpath:db.properties"></properties>
     <!--指定特定数据库的jdbc驱动jar包的位置-->
-    <classPathEntry location="../tools/mysql-connector-java-5.1.46.jar" />
+    <classPathEntry location="mysql-connector-java-5.1.46.jar" />
 
     <context id="default" targetRuntime="MyBatis3">
         <property name="mergeable" value="true" />
