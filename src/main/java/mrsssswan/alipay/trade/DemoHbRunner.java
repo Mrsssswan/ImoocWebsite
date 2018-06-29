@@ -1,17 +1,13 @@
 package mrsssswan.alipay.trade;
-
-
 import com.alipay.demo.trade.model.builder.AlipayHeartbeatSynRequestBuilder;
 import com.alipay.demo.trade.model.hb.*;
 import com.alipay.demo.trade.service.AlipayMonitorService;
 import com.alipay.demo.trade.service.impl.hb.AbsHbRunner;
 import com.alipay.demo.trade.service.impl.hb.HbQueue;
 import com.alipay.demo.trade.utils.Utils;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
 
 /**
  * Created by liuyangkly on 15/10/23.

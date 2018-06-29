@@ -1,19 +1,11 @@
 package mrsssswan.mall.controller.backend;
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 import com.github.pagehelper.util.StringUtil;
 import com.google.common.collect.Maps;
-=======
->>>>>>> 319770798c7ce1d95fcbbb1b1c2c241c5f673302
-=======
->>>>>>> 319770798c7ce1d95fcbbb1b1c2c241c5f673302
 import mrsssswan.mall.commons.Const;
 import mrsssswan.mall.commons.ServerResponse;
 import mrsssswan.mall.pojo.Product;
 import mrsssswan.mall.pojo.User;
-<<<<<<< HEAD
-<<<<<<< HEAD
 import mrsssswan.mall.service.IFileService;
 import mrsssswan.mall.service.IUserService;
 import mrsssswan.mall.service.impl.ProductServiceImpl;
@@ -27,20 +19,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.util.Map;
-=======
-=======
->>>>>>> 319770798c7ce1d95fcbbb1b1c2c241c5f673302
-import mrsssswan.mall.service.IUserService;
-import mrsssswan.mall.service.impl.ProductServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpSession;
-<<<<<<< HEAD
->>>>>>> 319770798c7ce1d95fcbbb1b1c2c241c5f673302
-=======
->>>>>>> 319770798c7ce1d95fcbbb1b1c2c241c5f673302
 
 @Controller
 @RequestMapping("/manage/product")
@@ -49,16 +27,8 @@ public class ProductManageController {
     private IUserService iUserService;
     @Autowired
     private ProductServiceImpl productService;
-<<<<<<< HEAD
-<<<<<<< HEAD
     @Autowired
     private IFileService iFileService;
-=======
-
->>>>>>> 319770798c7ce1d95fcbbb1b1c2c241c5f673302
-=======
-
->>>>>>> 319770798c7ce1d95fcbbb1b1c2c241c5f673302
     /**
      * 保存或者更新产品
      * @param session
@@ -167,8 +137,6 @@ public class ProductManageController {
         }
         return ServerResponse.createByErrorMessage("需要管理员权限");
     }
-<<<<<<< HEAD
-<<<<<<< HEAD
     @ResponseBody
     @PostMapping("img_upload.do")
     public Map img_upload(HttpSession session, MultipartFile file, HttpServletRequest request, HttpServletResponse response){
@@ -199,8 +167,4 @@ public class ProductManageController {
         return resultMap;
 
     }
-=======
->>>>>>> 319770798c7ce1d95fcbbb1b1c2c241c5f673302
-=======
->>>>>>> 319770798c7ce1d95fcbbb1b1c2c241c5f673302
 }

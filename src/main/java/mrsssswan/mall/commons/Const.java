@@ -9,13 +9,6 @@ public class Const {
         int ROLE_CUSTOMER = 0; //普通用户
         int ROLE_ADMIN = 1; //管理员
     }
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-
-
-
-
 
    public  enum OrderStatusEnum{
         CANCEL(0,"已取消"),
@@ -49,8 +42,4 @@ public class Const {
        String RESPONSE_SUCCESS = "success";
        String RESPONSE_FAILED = "failed";
    }
-=======
->>>>>>> b688ebfab920628eafa9c4ad1021c5673a1bae70
-=======
->>>>>>> 319770798c7ce1d95fcbbb1b1c2c241c5f673302
 }

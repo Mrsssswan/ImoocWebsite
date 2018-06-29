@@ -176,14 +176,7 @@
       update_time = #{updateTime,jdbcType=TIMESTAMP}
     where id = #{id,jdbcType=INTEGER}
   </update>
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 319770798c7ce1d95fcbbb1b1c2c241c5f673302
-=======
->>>>>>> 319770798c7ce1d95fcbbb1b1c2c241c5f673302
-  
+
   <select id="getList" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List"></include>
@@ -204,15 +197,6 @@
       </if>
     </where>
   </select>
-<<<<<<< HEAD
-<<<<<<< HEAD
+
  </mapper>
-=======
-</mapper>
->>>>>>> b688ebfab920628eafa9c4ad1021c5673a1bae70
-=======
- </mapper>
->>>>>>> 319770798c7ce1d95fcbbb1b1c2c241c5f673302
-=======
- </mapper>
->>>>>>> 319770798c7ce1d95fcbbb1b1c2c241c5f673302
+
