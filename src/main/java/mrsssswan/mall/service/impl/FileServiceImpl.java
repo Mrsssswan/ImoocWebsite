@@ -17,9 +17,9 @@ public class FileServiceImpl implements IFileService {
     @Override
     public String upload(MultipartFile file, String path) {
         String fileName = file.getOriginalFilename();
-        String fileNameExtension = fileName.substring(fileName.indexOf(",")+1);
+        String fileNameExtension = fileName.substring(fileName.indexOf(".")+1);
         //生成上传文件的文件名
-        String uplaodFileName = UUID.randomUUID().toString()+fileNameExtension;
+        String uplaodFileName = UUID.randomUUID().toString()+"."+fileNameExtension;
         logger.info("开始上传文件，上传的文件名：{},上传的路径：{}，新文件名：{}",fileName,path,uplaodFileName);
         File filedir = new File(path);
         if(!filedir.exists()){
@@ -27,13 +27,16 @@ public class FileServiceImpl implements IFileService {
             filedir.mkdirs();
         }
         File targetFile = new File(path,uplaodFileName);
-        try {
+            try {
             //文件上传
             file.transferTo(targetFile);
+                logger.info("文件已经够上传成功了");
             //文件上传到sftp服务器上
             SFTPUtils.uploadFile(path,targetFile);
+                logger.info("文件已经上传到sftp服务器上了");
             //上传之后删除文件
             targetFile.delete();
+                logger.info("上传之后删除文件了");
         } catch (IOException e) {
             e.printStackTrace();
         } catch (SftpException e) {

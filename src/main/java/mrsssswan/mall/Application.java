@@ -2,6 +2,15 @@ package mrsssswan.mall;
 
 public class Application {
     public static void main(String[] args) {
-        System.out.println("程序入口");
+            String s = new String("1");
+            s =  s.intern();
+            String s2 = "1";
+            System.out.println(s == s2);
+
+            String s3 = new String("1") + new String("1");
+            s3.intern();
+            String s4 = "11";
+            System.out.println(s3 == s4);
+        }
     }
-}
+

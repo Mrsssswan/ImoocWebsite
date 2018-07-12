@@ -23,7 +23,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 
-@RequestMapping("/order")
+@RequestMapping("/order/")
 @Controller
 public class OrderController {
     private Logger log = LoggerFactory.getLogger(OrderController.class);

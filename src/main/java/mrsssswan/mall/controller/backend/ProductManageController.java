@@ -139,7 +139,7 @@ public class ProductManageController {
     }
     @ResponseBody
     @PostMapping("img_upload.do")
-    public Map img_upload(HttpSession session, MultipartFile file, HttpServletRequest request, HttpServletResponse response){
+    public Map img_upload(HttpSession session,MultipartFile uploadFile, HttpServletRequest request, HttpServletResponse response) {
         Map resultMap = Maps.newHashMap();
         User user = (User)session.getAttribute(Const.CURRENT_USER);
         if(user == null){
@@ -149,7 +149,7 @@ public class ProductManageController {
         }
         if(iUserService.checkAdminRole(user).isSuccess()){
             String path = request.getSession().getServletContext().getRealPath("upload");
-            String targetFileName = iFileService.upload(file,path);
+            String targetFileName = iFileService.upload(uploadFile,path);
             if(StringUtils.isBlank(targetFileName)){
                 resultMap.put("success",false);
                 resultMap.put("msg","上传失败");
