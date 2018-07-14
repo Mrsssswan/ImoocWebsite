@@ -203,8 +203,8 @@
     select
      <include refid="Base_Column_List"></include>
     from mmall_order
-    where user_id=#{id}
-    and order_no=#{num}
+    where user_id= #{id}
+    and order_no= #{num}
   </select>
 
   <select id="selectByorderNo" resultMap="BaseResultMap" parameterType="long">

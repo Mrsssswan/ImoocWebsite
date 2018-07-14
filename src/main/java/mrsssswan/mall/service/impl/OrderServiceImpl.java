@@ -10,34 +10,34 @@ import com.alipay.demo.trade.model.result.AlipayF2FPrecreateResult;
 import com.alipay.demo.trade.service.AlipayTradeService;
 import com.alipay.demo.trade.service.impl.AlipayTradeServiceImpl;
 import com.alipay.demo.trade.utils.ZxingUtils;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.jcraft.jsch.SftpException;
 import mrsssswan.mall.commons.Const;
 import mrsssswan.mall.commons.ServerResponse;
-import mrsssswan.mall.dao.OrderItemMapper;
-import mrsssswan.mall.dao.OrderMapper;
-import mrsssswan.mall.dao.PayInfoMapper;
-import mrsssswan.mall.pojo.Order;
-import mrsssswan.mall.pojo.OrderItem;
-import mrsssswan.mall.pojo.PayInfo;
+import mrsssswan.mall.dao.*;
+import mrsssswan.mall.pojo.*;
 import mrsssswan.mall.service.IOrderService;
 import mrsssswan.mall.util.BigDecimalUtil;
 import mrsssswan.mall.util.DateTimeUtil;
 import mrsssswan.mall.util.PropertiesUtil;
 import mrsssswan.mall.util.SFTPUtils;
+import mrsssswan.mall.vo.OrderItemVo;
+import mrsssswan.mall.vo.OrderProductVO;
+import mrsssswan.mall.vo.OrderVO;
+import mrsssswan.mall.vo.ShippingVo;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.math.BigDecimal;
+import java.util.*;
 
 @Service("iOrderService")
 public class OrderServiceImpl implements IOrderService{
@@ -48,7 +48,222 @@ public class OrderServiceImpl implements IOrderService{
     private OrderItemMapper orderItemMapper;
     @Autowired
     private PayInfoMapper payInfoMapper;
+    @Autowired
+    private CartMapper cartMapper;
+    @Autowired
+    private ProductMapper productMapper;
+    @Autowired
+    private ShippingMapper shippingMapper;
+
     @Override
+    public ServerResponse createOrder(Integer userid,Integer shippingId){
+        List<Cart> cartList = cartMapper.selectCheckedcartByUserId(userid);
+        ServerResponse <List<OrderItem>> response = this.getCartOrderItem(userid,cartList);
+        if(!response.isSuccess()){
+            return response;
+        }
+        //计算订单总价
+        List<OrderItem> orderItemList = response.getData();
+        BigDecimal price = this.getTottlePrice(orderItemList);
+        //生成订单
+        Order order = assemblyOrder(userid,shippingId,price);
+        if(order == null){
+            return ServerResponse.createByErrorMessage("生成订单失败");
+        }
+        if(CollectionUtils.isEmpty(orderItemList)){
+            return ServerResponse.createByErrorMessage("购物车是空的");
+        }
+        //mybatis批量插入
+        orderItemMapper.batchInsert(orderItemList);
+        //减少产品库存
+        reduceProductStock(orderItemList);
+        //清空购物车
+        cleanCart(cartList);
+        //返回给前端的数据
+        OrderVO orderVO = assemblyOrderVO(order,orderItemList);
+        return ServerResponse.createBySuccess(orderVO);
+    }
+
+    @Override
+    public ServerResponse cancelOrder(Integer userid, long orderNo) {
+        Order order = orderMapper.selectUserIdAndOrderId(userid,orderNo);
+        if(order==null){
+            return ServerResponse.createByErrorMessage("该用户订单不存在");
+        }
+        if(order.getStatus() == Const.OrderStatusEnum.PAID.getCode()){
+            return ServerResponse.createByErrorMessage("已付款，无法取消");
+        }
+        Order updateOrder = new Order();
+        updateOrder.setId(order.getId());
+        updateOrder.setStatus(Const.OrderStatusEnum.CANCEL.getCode());
+        int row = orderMapper.updateByPrimaryKeySelective(updateOrder);
+        if(row>0){
+            return ServerResponse.createBySuccess();
+        }
+        return ServerResponse.createByError();
+    }
+
+    @Override
+    public ServerResponse orderCartProduct(Integer userid) {
+        OrderProductVO orderProductVO = new OrderProductVO();
+        //从购物车中取数据
+        List<Cart> cartList = cartMapper.selectCartByUserId(userid);
+        ServerResponse<List<OrderItem>> response = this.getCartOrderItem(userid,cartList);
+        if(!response.isSuccess()){
+            return response;
+        }
+        List<OrderItem> orderItemList = response.getData();
+        List<OrderItemVo> orderItemVoList = Lists.newArrayList();
+        BigDecimal price = new BigDecimal("0");
+        for(OrderItem orderItem:orderItemList){
+            price = BigDecimalUtil.add(price.doubleValue(),orderItem.getTotalPrice().doubleValue());
+            orderItemVoList.add(assembleOrderItemVo(orderItem));
+        }
+        orderProductVO.setOrderItemList(orderItemVoList);
+        orderProductVO.setTotlePrice(price);
+        orderProductVO.setImageHost(PropertiesUtil.getProperty("sftp.server.prefix"));
+        return ServerResponse.createBySuccess(orderProductVO);
+    }
+
+    private OrderVO assemblyOrderVO(Order order, List<OrderItem> orderItemList) {
+        OrderVO orderVo = new OrderVO();
+        orderVo.setOrderNo(order.getOrderNo());
+        orderVo.setPayment(order.getPayment());
+        orderVo.setPaymentType(order.getPaymentType());
+        orderVo.setPaymentTypeDesc(Const.PaymentTypeEnum.codeToMsg(order.getPaymentType()).getValue());
+
+        orderVo.setPostage(order.getPostage());
+        orderVo.setStatus(order.getStatus());
+        orderVo.setStatusDesc(Const.OrderStatusEnum.codeToMsg(order.getStatus()).getValue());
+
+        orderVo.setShippingId(order.getShippingId());
+        Shipping shipping = shippingMapper.selectByPrimaryKey(order.getShippingId());
+        if(shipping != null){
+            orderVo.setReceiverName(shipping.getReceiverName());
+            orderVo.setShippingVo(assembleShippingVo(shipping));
+        }
+
+        orderVo.setPaymentTime(DateTimeUtil.datarToStr(order.getPaymentTime()));
+        orderVo.setSendTime(DateTimeUtil.datarToStr(order.getSendTime()));
+        orderVo.setEndTime(DateTimeUtil.datarToStr(order.getEndTime()));
+        orderVo.setCreateTime(DateTimeUtil.datarToStr(order.getCreateTime()));
+        orderVo.setCloseTime(DateTimeUtil.datarToStr(order.getCloseTime()));
+
+
+        orderVo.setImageHost(PropertiesUtil.getProperty("sftp.server.prefix"));
+
+
+        List<OrderItemVo> orderItemVoList = Lists.newArrayList();
+
+        for(OrderItem orderItem : orderItemList){
+            OrderItemVo orderItemVo = assembleOrderItemVo(orderItem);
+            orderItemVoList.add(orderItemVo);
+        }
+        orderVo.setOrderItemVoList(orderItemVoList);
+        return orderVo;
+    }
+
+    private OrderItemVo assembleOrderItemVo(OrderItem orderItem) {
+        OrderItemVo orderItemVo = new OrderItemVo();
+        orderItemVo.setOrderNo(orderItem.getOrderNo());
+        orderItemVo.setProductId(orderItem.getProductId());
+        orderItemVo.setProductName(orderItem.getProductName());
+        orderItemVo.setProductImage(orderItem.getProductImage());
+        orderItemVo.setCurrentUnitPrice(orderItem.getCurrentUnitPrice());
+        orderItemVo.setQuantity(orderItem.getQuantity());
+        orderItemVo.setTotalPrice(orderItem.getTotalPrice());
+
+        orderItemVo.setCreateTime(DateTimeUtil.datarToStr(orderItem.getCreateTime()));
+        return orderItemVo;
+    }
+
+    private ShippingVo assembleShippingVo(Shipping shipping) {
+        ShippingVo shippingVo = new ShippingVo();
+        shippingVo.setReceiverName(shipping.getReceiverName());
+        shippingVo.setReceiverAddress(shipping.getReceiverAddress());
+        shippingVo.setReceiverProvince(shipping.getReceiverProvince());
+        shippingVo.setReceiverCity(shipping.getReceiverCity());
+        shippingVo.setReceiverDistrict(shipping.getReceiverDistrict());
+        shippingVo.setReceiverMobile(shipping.getReceiverMobile());
+        shippingVo.setReceiverZip(shipping.getReceiverZip());
+        shippingVo.setReceiverPhone(shippingVo.getReceiverPhone());
+        return shippingVo;
+    }
+
+    private void cleanCart(List<Cart> cartList) {
+        for(Cart cart:cartList){
+            cartMapper.deleteByPrimaryKey(cart.getId());
+        }
+    }
+
+    private void reduceProductStock(List<OrderItem> orderItemList) {
+        for(OrderItem orderItem:orderItemList){
+            Product product = productMapper.selectByPrimaryKey(orderItem.getProductId());
+            product.setStock(product.getStock()-orderItem.getQuantity());
+            productMapper.updateByPrimaryKeySelective(product);
+        }
+    }
+
+    private Order assemblyOrder(Integer userid, Integer shippingId, BigDecimal price) {
+        Order order = new Order();
+        long orderNo = this.generatorOrderNo();
+        order.setOrderNo(orderNo);
+        order.setStatus(Const.OrderStatusEnum.NO_PAY.getCode());
+        order.setPostage(0);
+        order.setPaymentType(Const.PaymentTypeEnum.OnLINE_PAY.getCode());
+        order.setUserId(userid);
+        order.setShippingId(shippingId);
+        order.setPayment(price);
+        //发货时间
+        //付款时间
+
+        int row = orderMapper.insert(order);
+            if(row>0){
+                return order;
+            }
+
+        return null;
+    }
+
+    //生成订单号
+    private long generatorOrderNo(){
+        long currentTime = System.currentTimeMillis();
+        return currentTime+ new Random().nextInt();
+    }
+
+    private BigDecimal getTottlePrice(List<OrderItem> orderItemList){
+        BigDecimal payment = new BigDecimal("0");
+        for(OrderItem orderItem:orderItemList){
+           payment = BigDecimalUtil.add(payment.doubleValue(),orderItem.getTotalPrice().doubleValue());
+        }
+        return payment;
+    }
+    private ServerResponse<List<OrderItem>> getCartOrderItem(Integer userid, List<Cart> cartList){
+        List<OrderItem> orderItemList = Lists.newArrayList();
+        if(CollectionUtils.isEmpty(cartList)){
+            return ServerResponse.createByErrorMessage("购物车为空");
+        }
+        for(Cart cart:cartList){
+            OrderItem orderItem = new OrderItem();
+            Product product = productMapper.selectByPrimaryKey(cart.getProductId());
+            if(Const.ProductStatus.On_SALE.getCode() != product.getStatus()){
+                return ServerResponse.createByErrorMessage("此商品暂不售卖");
+            }
+            if(cart.getQuantity()>product.getStock()){
+                return ServerResponse.createByErrorMessage("产品"+product.getName()+"库存不足");
+            }
+            orderItem.setUserId(userid);
+            orderItem.setProductId(product.getId());
+            orderItem.setProductName(product.getName());
+            orderItem.setProductImage(product.getMainImage());
+            orderItem.setCurrentUnitPrice(product.getPrice());
+            orderItem.setQuantity(cart.getQuantity());
+            orderItem.setTotalPrice(BigDecimalUtil.mul(product.getPrice().doubleValue(),cart.getQuantity()));
+            orderItemList.add(orderItem);
+        }
+        return ServerResponse.createBySuccess(orderItemList);
+    }
+
     public ServerResponse pay(Long num, Integer id, String path) {
         //返回一个map 将订单号和生成的二维码返回给前端
         HashMap<String,String> map = Maps.newHashMap();

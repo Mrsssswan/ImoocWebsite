@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -30,18 +31,51 @@ public class OrderController {
     @Autowired
     private IOrderService iOrderService;
 
+    /**
+     * 创建订单
+     * @param session
+     * @param shippingId 购物车ID
+     * @return
+     */
     @ResponseBody
-    @PostMapping("pay.do")
-    public ServerResponse pay(HttpSession session, HttpServletRequest request, Long num) {
+    @GetMapping("create.do")
+    public ServerResponse pay(HttpSession session,Integer shippingId) {
         User user = (User) session.getAttribute(Const.CURRENT_USER);
         if (user == null) {
             return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(), ResponseCode.NEED_LOGIN.getMsg());
         }
-        //获取支付的路径
-        String qrpath = request.getSession().getServletContext().getRealPath("upload");
-        return iOrderService.pay(num, user.getId(), qrpath);
+        return iOrderService.createOrder(user.getId(),shippingId);
     }
 
+    /**
+     * 取消订单
+     * @param session
+     * @param orderNo 订单号
+     * @return
+     */
+    @ResponseBody
+    @GetMapping("calcel.do")
+    public ServerResponse calcel(HttpSession session,long orderNo) {
+        User user = (User) session.getAttribute(Const.CURRENT_USER);
+        if (user == null) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(), ResponseCode.NEED_LOGIN.getMsg());
+        }
+        return iOrderService.cancelOrder(user.getId(),orderNo);
+    }
+
+    /**
+     * 获取购物车中选中的商品
+     * @param session
+     */
+    @ResponseBody
+    @GetMapping("get_order_cart_product.do")
+    public ServerResponse getOrderCartProduct(HttpSession session) {
+        User user = (User) session.getAttribute(Const.CURRENT_USER);
+        if (user == null) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(), ResponseCode.NEED_LOGIN.getMsg());
+        }
+        return iOrderService.orderCartProduct(user.getId());
+    }
     @ResponseBody
     @PostMapping("aplipay_callback.do")
     public Object aplipay_callback(HttpServletRequest request) {
