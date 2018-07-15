@@ -77,7 +77,7 @@ public class OrderController {
         return iOrderService.orderCartProduct(user.getId());
     }
     @ResponseBody
-    @PostMapping("aplipay_callback.do")
+    @GetMapping("aplipay_callback.do")
     public Object aplipay_callback(HttpServletRequest request) {
         HashMap map = Maps.newHashMap();
         Map resultMap = request.getParameterMap();
@@ -117,7 +117,7 @@ public class OrderController {
      * @return 支付或未支付
      */
     @ResponseBody
-    @PostMapping("query_order_pay_status.do")
+    @GetMapping("query_order_pay_status.do")
     public ServerResponse<Boolean> queryOrderPayStatus(HttpSession session,  Long num) {
         User user = (User) session.getAttribute(Const.CURRENT_USER);
         if (user == null) {
