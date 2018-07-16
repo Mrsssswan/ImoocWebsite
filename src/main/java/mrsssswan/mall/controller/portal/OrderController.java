@@ -9,14 +9,13 @@ import mrsssswan.mall.commons.ResponseCode;
 import mrsssswan.mall.commons.ServerResponse;
 import mrsssswan.mall.pojo.User;
 import mrsssswan.mall.service.IOrderService;
+import mrsssswan.mall.vo.OrderVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.HashMap;
@@ -75,6 +74,38 @@ public class OrderController {
             return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(), ResponseCode.NEED_LOGIN.getMsg());
         }
         return iOrderService.orderCartProduct(user.getId());
+    }
+
+    /**
+     * 查看订单详情
+     * @param orderNo 订单号
+     * @param session
+     */
+    @ResponseBody
+    @GetMapping("get_order_detail.do")
+    public ServerResponse<OrderVO> getOrderDetail(HttpSession session, long orderNo) {
+        User user = (User) session.getAttribute(Const.CURRENT_USER);
+        if (user == null) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(), ResponseCode.NEED_LOGIN.getMsg());
+        }
+        return iOrderService.orderDetail(user.getId(),orderNo);
+    }
+    /**
+     * 列出所有订单
+     * @param session
+     * @param pageNum 分页数量
+     * @param pageSize 分页大小
+     * @return
+     */
+    @ResponseBody
+    @GetMapping("order_list.do")
+    public ServerResponse<OrderVO> orderList(HttpSession session, @RequestParam(value = "pageNum",defaultValue = "0")Integer pageNum,
+                                                @RequestParam(value = "pageSize",defaultValue = "10")Integer pageSize) {
+        User user = (User) session.getAttribute(Const.CURRENT_USER);
+        if (user == null) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(), ResponseCode.NEED_LOGIN.getMsg());
+        }
+        return iOrderService.orderList(user.getId(),pageNum,pageSize);
     }
     @ResponseBody
     @GetMapping("aplipay_callback.do")

@@ -23,4 +23,7 @@ public interface OrderMapper {
 
     Order selectByorderNo(Long oderNo);
 
+    List<Order> selectAllByUserId(Integer userid);
+
+    List<Order> selectAllOrder();
 }
